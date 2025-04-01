@@ -226,12 +226,25 @@
       // Subscribe to feedback
       pubnub.addListener({
         message: function(event) {
-          var msg = event.message.value;
+          var msg = event.message;
           var statusText = "";
-          if (msg === 2) statusText = "Moving Up";
-          else if (msg === 1) statusText = "Moving Down";
-          else if (msg === 0) statusText = "Stopped";
-          else statusText = event.message.status;
+
+          // Handle no_motion alert
+          if (msg.alert === "no_motion") {
+            const secondsInactive = Math.round(msg.seconds_inactive);
+            statusText = `No motion detected for ${secondsInactive} seconds`;
+          }
+          // Handle regular movement commands
+          else if (msg.value !== undefined) {
+            if (msg.value === 2) statusText = "Moving Up";
+            else if (msg.value === 1) statusText = "Moving Down";
+            else if (msg.value === 0) statusText = "Stopped";
+            else statusText = "Unknown command";
+          }
+          // Handle status messages
+          else if (msg.status) {
+            statusText = msg.status;
+          }
 
           var timestamp = formatTimestamp();
           var pElement = $('<p>').text(`[${timestamp}] ${statusText}`);
