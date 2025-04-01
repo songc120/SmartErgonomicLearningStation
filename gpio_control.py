@@ -30,8 +30,8 @@ class GPIOPubNubController:
         self.channel = 'chenweisong728'
         self.pubnub = PubNub(pnconfig)
         
-        # Add message listener
-        self.pubnub.add_listener(self.MySubscribeCallback())
+        # Add message listener with self reference
+        self.pubnub.add_listener(self.MySubscribeCallback(self))
         
     def set_output(self, value):
         """
