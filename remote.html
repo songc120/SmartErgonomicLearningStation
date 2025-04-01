@@ -36,6 +36,16 @@
             <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" id="autoBtn">Start Auto</button>
           </div>
         </div>
+        <div class="ui-grid-a">
+          <div class="ui-block-a">
+            <label for="autoInterval">Auto Timer (seconds):</label>
+            <input type="number" id="autoInterval" value="5" min="1" max="60" class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset">
+          </div>
+          <div class="ui-block-b">
+            <label for="motionInterval">Motion Duration (seconds):</label>
+            <input type="number" id="motionInterval" value="2" min="1" max="30" class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset">
+          </div>
+        </div>
       </div>
       <h1 class="ui-bar ui-bar-a ui-corner-all">Status</h1>
       <div id="status" class="ui-body ui-body-a ui-corner-all"></div>
@@ -86,14 +96,15 @@
           message: { "value": parseInt(value) }
         });
 
-        // If it's an up or down command, set a timer to stop after 2 seconds
+        // If it's an up or down command, set a timer to stop after motion interval
         if (value === "1" || value === "2") {
+          const motionInterval = parseInt($('#motionInterval').val()) * 1000;
           setTimeout(function() {
             pubnub.publish({
               channel: channel,
               message: { "value": 0 }
             });
-          }, 2000);
+          }, motionInterval);
         }
       });
 
@@ -120,12 +131,13 @@
       // Function to resume the timer
       function resumeTimer() {
         if (isAutoRunning) {
+          const autoIntervalMs = parseInt($('#autoInterval').val()) * 1000;
           autoInterval = setInterval(function() {
             if (!pendingDirectionChange) {
               const nextDir = currentDirection === 2 ? 1 : 2;
               showConfirmationDialog(nextDir);
             }
-          }, 5000);
+          }, autoIntervalMs);
         }
       }
 
@@ -139,14 +151,15 @@
           currentDirection = nextDirection;
           pendingDirectionChange = false;
 
-          // Set timer to stop after 2 seconds
+          // Set timer to stop after motion interval
           clearTimeout(motionTimer);
+          const motionInterval = parseInt($('#motionInterval').val()) * 1000;
           motionTimer = setTimeout(function() {
             pubnub.publish({
               channel: channel,
               message: { "value": 0 }
             });
-          }, 2000);
+          }, motionInterval);
         }
         $.mobile.changePage("#main", { transition: "pop" });
         // Auto dismiss after 1 second
