@@ -11,32 +11,24 @@
 <body>
   <div data-role="page">
     <div data-role="header">
-      <h1>Assignment 3 with Servo</h1>
+      <h1>2-Bit GPIO Control</h1>
     </div>
     <div data-role="content" style="width: 90%">
-      <h1 class="ui-bar ui-bar-a ui-corner-all">Light</h1>
+      <h1 class="ui-bar ui-bar-a ui-corner-all">Control Panel</h1>
       <div class="ui-body ui-body-a ui-corner-all">
-        <div class="ui-grid-a toggle" id="lightOn">
+        <div class="ui-grid-a toggle" id="up">
           <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">On</button>
+            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="2">Up</button>
           </div>
         </div>
-        <div class="ui-grid-a toggle" id="lightOff">
+        <div class="ui-grid-a toggle" id="down">
           <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Off</button>
+            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">Down</button>
           </div>
         </div>
-      </div>
-      <h1 class="ui-bar ui-bar-a ui-corner-all">Servo</h1>
-      <div class="ui-body ui-body-a ui-corner-all">
-        <div class="ui-grid-a toggle" id="servoOpen">
+        <div class="ui-grid-a toggle" id="stop">
           <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">Open</button>
-          </div>
-        </div>
-        <div class="ui-grid-a toggle" id="servoClosed">
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Close</button>
+            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Stop</button>
           </div>
         </div>
       </div>
@@ -59,20 +51,19 @@
         var module = $(this).parent().parent().attr("id");
         pubnub.publish({
           channel: channel,
-          message: { "": module }
+          message: { "value": parseInt(value) }
         });
       });
 
       // Subscribe to feedback
       pubnub.addListener({
         message: function(event) {
-          var msg = event.message[""] || event.message.myMessage || "Unknown command";
+          var msg = event.message.value;
           var statusText = "";
-          if (msg === "lightOn") statusText = "Light Turned On";
-          else if (msg === "lightOff") statusText = "Light Turned Off";
-          else if (msg === "servoOpen") statusText = "Servo Opened";
-          else if (msg === "servoClosed") statusText = "Servo Closed";
-          else statusText = msg;
+          if (msg === 2) statusText = "Moving Up";
+          else if (msg === 1) statusText = "Moving Down";
+          else if (msg === 0) statusText = "Stopped";
+          else statusText = "Unknown command";
 
           var pElement = $('<p>').text(statusText);
           $('#status').prepend(pElement);

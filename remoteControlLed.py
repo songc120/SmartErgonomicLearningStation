@@ -6,7 +6,7 @@ import time
 
 # Pin Setup
 LED_PIN = 17
-SERVO_PIN = 18
+SERVO_PIN = 24
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.setup(SERVO_PIN, GPIO.OUT)

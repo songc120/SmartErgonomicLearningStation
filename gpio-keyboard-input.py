@@ -20,6 +20,18 @@ pnconf.uuid = 'userId'
 pubnub = PubNub(pnconf)
 channel = 'chenweisong728'
 
+pubnub.add_listener(MySubscribeCallback())
+pubnub.subscribe().channels(channel).execute()
+
+pubnub.publish().channel(channel).message({
+                'status': 'device_status',
+                'motion_detected': GPIO.input(pir) == GPIO.HIGH,
+                'heating_active': heating_active,
+                'alarm_active': alarm_active,
+                'last_motion_time': last_motion_time,
+                'no_motion_time': no_motion_time
+            }).sync()
+
 def setup_gpio():
     """Set up GPIO mode and pin configuration"""
     GPIO.setmode(GPIO.BCM)  # Use BCM numbering scheme
