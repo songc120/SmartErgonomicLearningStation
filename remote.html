@@ -31,6 +31,11 @@
             <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Stop</button>
           </div>
         </div>
+        <div class="ui-grid-a toggle" id="auto">
+          <div class="ui-block-b">
+            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" id="autoBtn">Start Auto</button>
+          </div>
+        </div>
       </div>
       <h1 class="ui-bar ui-bar-a ui-corner-all">Status</h1>
       <div id="status" class="ui-body ui-body-a ui-corner-all"></div>
@@ -59,6 +64,44 @@
           channel: channel,
           message: { "value": parseInt(value) }
         });
+      });
+
+      // Auto control variables
+      let autoInterval;
+      let isAutoRunning = false;
+      let currentDirection = 2; // 2 for up, 1 for down
+
+      // Auto control function
+      function toggleAutoControl() {
+        if (!isAutoRunning) {
+          isAutoRunning = true;
+          $('#autoBtn').text('Stop Auto');
+          
+          // Start the oscillation
+          autoInterval = setInterval(function() {
+            pubnub.publish({
+              channel: channel,
+              message: { "value": currentDirection }
+            });
+            
+            // Toggle direction
+            currentDirection = currentDirection === 2 ? 1 : 2;
+          }, 5000);
+        } else {
+          isAutoRunning = false;
+          $('#autoBtn').text('Start Auto');
+          clearInterval(autoInterval);
+          // Send stop command
+          pubnub.publish({
+            channel: channel,
+            message: { "value": 0 }
+          });
+        }
+      }
+
+      // Add click handler for auto button
+      $('#autoBtn').click(function() {
+        toggleAutoControl();
       });
 
       // Subscribe to feedback
