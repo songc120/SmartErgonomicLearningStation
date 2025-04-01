@@ -3,6 +3,23 @@ import sys
 import termios
 import tty
 
+from pubnub.pubnub import PubNub, SubscribeListener, SubscribeCallback, PNStatusCategory
+from pubnub.pnconfiguration import PNConfiguration
+from pubnub.exceptions import PubNubException
+import time
+import threading
+import json
+import adafruit_dht
+import board
+
+
+pnconf = PNConfiguration()
+pnconf.publish_key = 'pub-c-85ba3694-4855-4861-a14b-fdfcb90cf839'
+pnconf.subscribe_key = 'sub-c-7c1de1d9-ea5b-451f-bb88-35ae502a81c4'
+pnconf.uuid = 'userId'
+pubnub = PubNub(pnconf)
+channel = 'chenweisong728'
+
 def setup_gpio():
     """Set up GPIO mode and pin configuration"""
     GPIO.setmode(GPIO.BCM)  # Use BCM numbering scheme

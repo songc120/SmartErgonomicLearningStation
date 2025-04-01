@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="http://fonts.googleapis.com/css?family=Roboto:400,700,300" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jquerymobile/1.4.3/jquery.mobile.min.css" />
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquerymobile/1.4.3/jquery.mobile.min.js"></script>
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.21.6.min.js"></script>
+</head>
+<body>
+  <div data-role="page">
+    <div data-role="header">
+      <h1>Assignment 3 with Servo</h1>
+    </div>
+    <div data-role="content" style="width: 90%">
+      <h1 class="ui-bar ui-bar-a ui-corner-all">Light</h1>
+      <div class="ui-body ui-body-a ui-corner-all">
+        <div class="ui-grid-a toggle" id="lightOn">
+          <div class="ui-block-b">
+            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">On</button>
+          </div>
+        </div>
+        <div class="ui-grid-a toggle" id="lightOff">
+          <div class="ui-block-b">
+            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Off</button>
+          </div>
+        </div>
+      </div>
+      <h1 class="ui-bar ui-bar-a ui-corner-all">Servo</h1>
+      <div class="ui-body ui-body-a ui-corner-all">
+        <div class="ui-grid-a toggle" id="servoOpen">
+          <div class="ui-block-b">
+            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">Open</button>
+          </div>
+        </div>
+        <div class="ui-grid-a toggle" id="servoClosed">
+          <div class="ui-block-b">
+            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Close</button>
+          </div>
+        </div>
+      </div>
+      <h1 class="ui-bar ui-bar-a ui-corner-all">Status</h1>
+      <div id="status" class="ui-body ui-body-a ui-corner-all"></div>
+    </div>
+  </div>
+
+  <script>
+    $(function() {
+      var channel = "chenweisong728";
+      var pubnub = new PubNub({
+        publishKey: 'pub-c-85ba3694-4855-4861-a14b-fdfcb90cf839',
+        subscribeKey: 'sub-c-7c1de1d9-ea5b-451f-bb88-35ae502a81c4'
+      });
+
+      // Publish button clicks
+      $('button').click(function() {
+        var value = $(this).val();
+        var module = $(this).parent().parent().attr("id");
+        pubnub.publish({
+          channel: channel,
+          message: { "": module }
+        });
+      });
+
+      // Subscribe to feedback
+      pubnub.addListener({
+        message: function(event) {
+          var msg = event.message[""] || event.message.myMessage || "Unknown command";
+          var statusText = "";
+          if (msg === "lightOn") statusText = "Light Turned On";
+          else if (msg === "lightOff") statusText = "Light Turned Off";
+          else if (msg === "servoOpen") statusText = "Servo Opened";
+          else if (msg === "servoClosed") statusText = "Servo Closed";
+          else statusText = msg;
+
+          var pElement = $('<p>').text(statusText);
+          $('#status').prepend(pElement);
+        }
+      });
+
+      pubnub.subscribe({
+        channels: [channel]
+      });
+    });
+  </script>
+</body>
+</html>
