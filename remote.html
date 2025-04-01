@@ -42,6 +42,27 @@
     </div>
   </div>
 
+  <!-- Add confirmation dialog -->
+  <div data-role="dialog" id="confirmDialog" data-close-btn="none">
+    <div data-role="header">
+      <h1>Direction Change</h1>
+    </div>
+    <div data-role="main" class="ui-content">
+      <h2>Confirm upcoming move</h2>
+      <p id="confirmMessage"></p>
+    </div>
+    <div data-role="footer">
+      <div class="ui-grid-a">
+        <div class="ui-block-a">
+          <a href="#" class="ui-btn ui-corner-all ui-btn-inline" id="confirmYes">Confirm</a>
+        </div>
+        <div class="ui-block-b">
+          <a href="#" class="ui-btn ui-corner-all ui-btn-inline" id="confirmNo">Cancel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     $(function() {
       var channel = "chenweisong728";
@@ -70,6 +91,62 @@
       let autoInterval;
       let isAutoRunning = false;
       let currentDirection = 2; // 2 for up, 1 for down
+      let pendingDirectionChange = false;
+      let nextDirection = 2;
+      let remainingTime = 0; // Store remaining time when paused
+
+      // Function to show confirmation dialog
+      function showConfirmationDialog(nextDir) {
+        pendingDirectionChange = true;
+        nextDirection = nextDir;
+        const message = nextDir === 2 ? "Moving Up" : "Moving Down";
+        $('#confirmMessage').text(message);
+        // Clear the current interval
+        clearInterval(autoInterval);
+        $.mobile.changePage("#confirmDialog", { transition: "pop" });
+      }
+
+      // Function to resume the timer
+      function resumeTimer() {
+        if (isAutoRunning) {
+          autoInterval = setInterval(function() {
+            if (!pendingDirectionChange) {
+              const nextDir = currentDirection === 2 ? 1 : 2;
+              showConfirmationDialog(nextDir);
+            }
+          }, 5000);
+        }
+      }
+
+      // Handle confirmation dialog responses
+      $('#confirmYes').click(function() {
+        if (pendingDirectionChange) {
+          pubnub.publish({
+            channel: channel,
+            message: { "value": nextDirection }
+          });
+          currentDirection = nextDirection;
+          pendingDirectionChange = false;
+        }
+        $.mobile.changePage("#main", { transition: "pop" });
+        // Auto dismiss after 1 second
+        setTimeout(function() {
+          $('#confirmDialog').dialog('close');
+          // Resume the timer after dialog is closed
+          resumeTimer();
+        }, 1000);
+      });
+
+      $('#confirmNo').click(function() {
+        pendingDirectionChange = false;
+        $.mobile.changePage("#main", { transition: "pop" });
+        // Auto dismiss after 1 second
+        setTimeout(function() {
+          $('#confirmDialog').dialog('close');
+          // Resume the timer after dialog is closed
+          resumeTimer();
+        }, 1000);
+      });
 
       // Auto control function
       function toggleAutoControl() {
@@ -79,13 +156,10 @@
           
           // Start the oscillation
           autoInterval = setInterval(function() {
-            pubnub.publish({
-              channel: channel,
-              message: { "value": currentDirection }
-            });
-            
-            // Toggle direction
-            currentDirection = currentDirection === 2 ? 1 : 2;
+            if (!pendingDirectionChange) {
+              const nextDir = currentDirection === 2 ? 1 : 2;
+              showConfirmationDialog(nextDir);
+            }
           }, 5000);
         } else {
           isAutoRunning = false;
