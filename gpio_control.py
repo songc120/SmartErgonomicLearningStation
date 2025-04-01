@@ -3,6 +3,8 @@ from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
 from pubnub.callbacks import SubscribeCallback
 import time
+import json
+import os
 
 
 class GPIOPubNubController:
@@ -33,6 +35,35 @@ class GPIOPubNubController:
         # Add message listener with self reference
         self.pubnub.add_listener(self.MySubscribeCallback(self))
         
+        # Initialize motion log file
+        self.motion_log_file = 'motion_log.json'
+        self._initialize_motion_log()
+        
+    def _initialize_motion_log(self):
+        """Initialize the motion log file if it doesn't exist"""
+        if not os.path.exists(self.motion_log_file):
+            with open(self.motion_log_file, 'w') as f:
+                json.dump([], f)
+                
+    def _log_motion(self, signal):
+        """Log motion signal to the JSON file"""
+        try:
+            # Read existing logs
+            with open(self.motion_log_file, 'r') as f:
+                logs = json.load(f)
+            
+            # Add new log entry
+            logs.append({
+                "timestamp": time.time(),
+                "signal": signal
+            })
+            
+            # Write back to file
+            with open(self.motion_log_file, 'w') as f:
+                json.dump(logs, f, indent=2)
+        except Exception as e:
+            print(f"Error logging motion: {e}")
+        
     def set_output(self, value):
         """
         Set 2-bit output based on input value
@@ -53,6 +84,9 @@ class GPIOPubNubController:
             self.output_pins[1], 
             (value >> 1) & 1
         )  # Most significant bit
+        
+        # Log the motion signal
+        self._log_motion(value)
         
         # Print status with movement direction
         direction = "Stop" if value == 0 else "Up" if value == 1 else "Down"
