@@ -55,10 +55,10 @@ def main():
     """Main function to handle GPIO output based on keyboard input"""
     try:
         setup_gpio()
-        print("GPIO Keyboard Control")
-        print("Press '0' to set GPIO pin LOW")
-        print("Press '1' to set GPIO pin HIGH")
-        print("Press 'q' to quit")
+        # print("GPIO Keyboard Control")
+        # print("Press '0' to set GPIO pin LOW")
+        # print("Press '1' to set GPIO pin HIGH")
+        # print("Press 'q' to quit")
         
         while True:
             # Get keyboard input

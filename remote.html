@@ -73,6 +73,24 @@
     </div>
   </div>
 
+  <!-- Add "Are you here?" dialog -->
+  <div data-role="dialog" id="areYouHereDialog" data-close-btn="none">
+    <div data-role="header">
+      <h1>Are you here?</h1>
+    </div>
+    <div data-role="main" class="ui-content">
+      <h2>No motion detected</h2>
+      <p>Auto mode will be deactivated in <span id="countdown">10</span> seconds if no response.</p>
+    </div>
+    <div data-role="footer">
+      <div class="ui-grid-a">
+        <div class="ui-block-b">
+          <a href="#" class="ui-btn ui-corner-all ui-btn-inline" id="cancelAuto">Cancel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     $(function() {
       var channel = "chenweisong728";
@@ -86,6 +104,40 @@
         var now = new Date();
         return now.toLocaleTimeString() + ' ' + now.toLocaleDateString();
       }
+
+      // Variables for "Are you here?" dialog
+      let inactivityTimer;
+      let countdownInterval;
+      let remainingSeconds = 10;
+
+      // Function to show "Are you here?" dialog
+      function showAreYouHereDialog() {
+        remainingSeconds = 10;
+        $('#countdown').text(remainingSeconds);
+        
+        // Show the dialog
+        $.mobile.changePage("#areYouHereDialog", { transition: "pop" });
+        
+        // Start countdown
+        countdownInterval = setInterval(function() {
+          remainingSeconds--;
+          $('#countdown').text(remainingSeconds);
+          
+          if (remainingSeconds <= 0) {
+            clearInterval(countdownInterval);
+            if (isAutoRunning) {
+              toggleAutoControl(); // This will stop auto mode
+            }
+            $('#areYouHereDialog').dialog('close');
+          }
+        }, 1000);
+      }
+
+      // Handle cancel button in "Are you here?" dialog
+      $('#cancelAuto').click(function() {
+        clearInterval(countdownInterval);
+        $('#areYouHereDialog').dialog('close');
+      });
 
       // Publish button clicks
       $('button').click(function() {
@@ -232,6 +284,9 @@
           // Handle no_motion alert
           if (msg.alert === "no_motion") {
             const secondsInactive = Math.round(msg.seconds_inactive);
+            if (isAutoRunning) {
+              showAreYouHereDialog();
+            }
             statusText = `No motion detected for ${secondsInactive} seconds`;
           }
           // Handle regular movement commands
