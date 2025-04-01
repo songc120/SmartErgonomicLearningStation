@@ -186,6 +186,12 @@
         if (!isAutoRunning) {
           isAutoRunning = true;
           $('#autoBtn').text('Stop Auto');
+
+          // Send Auto mode start message
+          pubnub.publish({
+            channel: channel,
+            message: { "status": "Auto mode start" }
+          });
           
           // Start the oscillation
           autoInterval = setInterval(function() {
@@ -197,6 +203,12 @@
         } else {
           isAutoRunning = false;
           $('#autoBtn').text('Start Auto');
+          // Send Auto mode stop message
+          pubnub.publish({
+            channel: channel,
+            message: { "status": "Auto mode stop" }
+          });
+
           clearInterval(autoInterval);
           // Send stop command
           pubnub.publish({
@@ -219,7 +231,7 @@
           if (msg === 2) statusText = "Moving Up";
           else if (msg === 1) statusText = "Moving Down";
           else if (msg === 0) statusText = "Stopped";
-          else statusText = "Unknown command";
+          else statusText = event.message.status;
 
           var timestamp = formatTimestamp();
           var pElement = $('<p>').text(`[${timestamp}] ${statusText}`);
