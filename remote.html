@@ -85,6 +85,16 @@
           channel: channel,
           message: { "value": parseInt(value) }
         });
+
+        // If it's an up or down command, set a timer to stop after 2 seconds
+        if (value === "1" || value === "2") {
+          setTimeout(function() {
+            pubnub.publish({
+              channel: channel,
+              message: { "value": 0 }
+            });
+          }, 2000);
+        }
       });
 
       // Auto control variables
@@ -94,6 +104,7 @@
       let pendingDirectionChange = false;
       let nextDirection = 2;
       let remainingTime = 0; // Store remaining time when paused
+      let motionTimer; // Timer for motion interval
 
       // Function to show confirmation dialog
       function showConfirmationDialog(nextDir) {
@@ -127,6 +138,15 @@
           });
           currentDirection = nextDirection;
           pendingDirectionChange = false;
+
+          // Set timer to stop after 2 seconds
+          clearTimeout(motionTimer);
+          motionTimer = setTimeout(function() {
+            pubnub.publish({
+              channel: channel,
+              message: { "value": 0 }
+            });
+          }, 2000);
         }
         $.mobile.changePage("#main", { transition: "pop" });
         // Auto dismiss after 1 second
