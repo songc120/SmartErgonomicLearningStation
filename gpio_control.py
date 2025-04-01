@@ -24,9 +24,10 @@ class GPIOPubNubController:
             
         # PubNub Configuration
         pnconfig = PNConfiguration()
-        pnconfig.subscribe_key = "sub-c-7c1de1d9-ea5b-451f-bb88-35ae502a81c4"
-        pnconfig.publish_key = "pub-c-85ba3694-4855-4861-a14b-fdfcb90cf839"
-        pnconfig.ssl = True
+        pnconfig.publish_key = 'pub-c-85ba3694-4855-4861-a14b-fdfcb90cf839'
+        pnconfig.subscribe_key = 'sub-c-7c1de1d9-ea5b-451f-bb88-35ae502a81c4'
+        pnconfig.uuid = 'userId'
+        self.channel = 'chenweisong728'
         self.pubnub = PubNub(pnconfig)
         
         # Add message listener
@@ -69,7 +70,7 @@ class GPIOPubNubController:
         """Main control loop for PubNub subscription"""
         try:
             print("Starting PubNub subscription...")
-            self.pubnub.subscribe().channels("chenweisong728").execute()
+            self.pubnub.subscribe().channels(self.channel).execute()
             
             while True:
                 time.sleep(1)
