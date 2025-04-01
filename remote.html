@@ -45,6 +45,12 @@
         subscribeKey: 'sub-c-7c1de1d9-ea5b-451f-bb88-35ae502a81c4'
       });
 
+      // Function to format timestamp
+      function formatTimestamp() {
+        var now = new Date();
+        return now.toLocaleTimeString() + ' ' + now.toLocaleDateString();
+      }
+
       // Publish button clicks
       $('button').click(function() {
         var value = $(this).val();
@@ -65,7 +71,8 @@
           else if (msg === 0) statusText = "Stopped";
           else statusText = "Unknown command";
 
-          var pElement = $('<p>').text(statusText);
+          var timestamp = formatTimestamp();
+          var pElement = $('<p>').text(`[${timestamp}] ${statusText}`);
           $('#status').prepend(pElement);
         }
       });

@@ -36,11 +36,15 @@ class GPIOPubNubController:
     def set_output(self, value):
         """
         Set 2-bit output based on input value
+        Value mapping:
+        - 0 (00) = stop
+        - 1 (01) = up
+        - 2 (10) = down
         
-        :param value: Integer between 0-3 representing 2-bit output
+        :param value: Integer between 0-2 representing movement direction
         """
-        if value < 0 or value > 3:
-            print(f"Invalid input: {value}. Must be between 0-3.")
+        if value < 0 or value > 2:
+            print(f"Invalid input: {value}. Must be between 0-2.")
             return
         
         # Convert value to binary and set pins
@@ -50,7 +54,9 @@ class GPIOPubNubController:
             (value >> 1) & 1
         )  # Most significant bit
         
-        print(f"Output set to: {value} (Binary: {value:02b})")
+        # Print status with movement direction
+        direction = "Stop" if value == 0 else "Up" if value == 1 else "Down"
+        print(f"Movement: {direction} (Binary: {value:02b})")
         print(f"Pin {self.output_pins[1]}: {(value >> 1) & 1}")
         print(f"Pin {self.output_pins[0]}: {value & 1}")
 
@@ -70,6 +76,10 @@ class GPIOPubNubController:
         """Main control loop for PubNub subscription"""
         try:
             print("Starting PubNub subscription...")
+            print("Movement Control:")
+            print("0 = Stop (00)")
+            print("1 = Up (01)")
+            print("2 = Down (10)")
             self.pubnub.subscribe().channels(self.channel).execute()
             
             while True:
