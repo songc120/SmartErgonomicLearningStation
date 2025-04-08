@@ -24,9 +24,9 @@ cleanup() {
 # Trap SIGINT (Ctrl+C) and SIGTERM to run the cleanup function
 trap cleanup SIGINT SIGTERM
 
-# Run fileA.py in background and save its PID.
+# Run gpio_control.py in background and save its PID.
 echo "Starting gpio_control.py..."
-python fileA.py &
+python gpio_control.py &
 pid_a=$!
 
 # If PARAM is true, run motion-alert-pubnub.py in background.
