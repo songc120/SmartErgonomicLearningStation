@@ -144,6 +144,11 @@
 
       // Publish button clicks
       $('button').click(function() {
+        // Skip PubNub message for Data Analysis button
+        if ($(this).attr('onclick') !== undefined) {
+          return;
+        }
+        
         var value = $(this).val();
         var module = $(this).parent().parent().attr("id");
         pubnub.publish({
