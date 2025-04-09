@@ -112,8 +112,8 @@ class GPIOPubNubController:
             print("Starting PubNub subscription...")
             print("Movement Control:")
             print("0 = Stop (00)")
-            print("1 = Up (01)")
-            print("2 = Down (10)")
+            print("1 = Down (01)")
+            print("2 = Up (10)")
             self.pubnub.subscribe().channels(self.channel).execute()
             
             while True:
